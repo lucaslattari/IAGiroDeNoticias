@@ -2,6 +2,8 @@ import packages
 from translate import Translator
 import sys
 import time
+import pickle
+import logging
 
 def countdown(seconds, printMessage = True):
     for i in range(seconds, 0, -1):
@@ -19,22 +21,14 @@ def translateConsideringAPILimit(text):
         return translated
     return translator.translate(text)
 
-def getTranslateData(dHeader, dArticle, GAMBIARRA_DO_PROBLEMA_DA_API = True):
+def constructDictionary(dHeader, dArticle, GAMBIARRA_DO_PROBLEMA_DA_API = True):
     i = 0
     dFinal = {}
     for headline, url in dHeader.items():
         dFinal[i] = {}
         if(GAMBIARRA_DO_PROBLEMA_DA_API):
             if(i == 0):
-                dFinal[i]["manchete"] = "Esta bateria USB C que pode carregar totalmente um MacBook Pro de 15 polegadas custa US $ 100 na Black Friday"
-            elif(i == 1):
-                dFinal[i]["manchete"] = "As vendas da Black Friday nos jogos que realmente amamos este ano"
-            elif(i == 2):
-                dFinal[i]["manchete"] = "Você ainda pode encontrar uma boa oferta de Black Friday em um Apple Watch"
-            elif(i == 3):
-                dFinal[i]["manchete"] = "LG G8 ThinQ pode ser o melhor negócio de telefone da Black Friday por apenas US $ 400"
-            elif(i == 4):
-                dFinal[i]["manchete"] = "China torna crime publicar deepfakes ou notícias falsas sem divulgação"
+                dFinal[i]["manchete"] = "A Apple lançará um iPhone sem portas em 2021"
         else:
             dFinal[i]["manchete"] = translateConsideringAPILimit(headline)
 
@@ -42,28 +36,44 @@ def getTranslateData(dHeader, dArticle, GAMBIARRA_DO_PROBLEMA_DA_API = True):
         dFinal[i]["autor"] = dArticle[i]["autor"]
         dFinal[i]["data"] = dArticle[i]["data"]
 
-        countParagraph = 0
-        dFinal[i]["texto"] = {}
-        for paragraph in dArticle[i]["texto"]:
-            if(GAMBIARRA_DO_PROBLEMA_DA_API):
-                if(i == 0 and countParagraph == 0):
-                    dFinal[i]["texto"][countParagraph] = "Atualização, 9:30 AM ET, 30 de novembro de 2019: o cupom para este desconto não está mais disponível e o preço voltou a US $ 140,99."
-                elif(i == 0 and countParagraph == 1):
-                    dFinal[i]["texto"][countParagraph] = "Em maio, apresentamos a você baterias externas USB C PD de alta potência que podem carregar um laptop de tamanho grande em movimento - e não apenas um telefone - e o Zendure SuperTank de US $ 150 foi uma das nossas principais opções graças ao seu tamanho (relativamente) compacto e preço. Mas para a Black Friday, o SuperTank agora é mais acessível do que tem sido desde sua campanha no Kickstarter - apenas US $ 100,99 após o código de cupom na Amazon."
-                elif(i == 1 and countParagraph == 0):
-                    dFinal[i]["texto"][countParagraph] = "A Black Friday é a melhor época do ano para os fãs de jogos que sentem que não têm orçamento ou tempo para escolher cada novo título de sucesso no dia do lançamento. Eu me encontro nessa categoria, como alguém que jogou o excelente Homem-Aranha da Insomniac um ano atrasado (atualmente na Black Friday por US $ 14,99 na Best Buy) e ainda tem alguns candidatos ao jogo do ano de 2019 no meu backlog."
-                elif(i == 2 and countParagraph == 0):
-                    dFinal[i]["texto"][countParagraph] = "Se você estava esperando para atualizar seu Apple Watch ou se é um comprador pela primeira vez, a Black Friday 2019 está cheia de grandes promoções na linha de smartwatches da Apple. Os compradores de olhos de águia podem ter rapidamente aumentado a venda de acessórios de porta do Walmart, que teve o Apple Watch Series 3 em US $ 129 - seu preço mais baixo em US $ 70 -, que mostramos em nosso guia maior sobre os negócios da Apple na sexta-feira negra. Mas ainda há algumas oportunidades de economizar, se você estiver interessado nos mais afetos da Apple"
-                elif(i == 3 and countParagraph == 0):
-                    dFinal[i]["texto"][countParagraph] = "O LG G8 ThinQ não é o telefone mais incrível do mundo, mas pode ser o melhor retorno nesta sexta-feira negra. Em abril, escrevemos que “você receberá muito telefone pelo seu dinheiro” se conseguir encontrá-lo por US $ 699 - mas hoje, você pode comprar a versão desbloqueada por apenas US $ 400 na Amazon! Isso equivale a US $ 450 do preço original."
-                elif(i == 4 and countParagraph == 0):
-                    dFinal[i]["texto"][countParagraph] = "A China lançou uma nova política do governo projetada para impedir a disseminação de notícias falsas e vídeos enganosos criados usando inteligência artificial, também conhecidos como deepfakes. A nova regra, divulgada hoje pela Reuters, proíbe a publicação de informações falsas ou deepfakes online sem a devida divulgação de que o post em questão foi criado com a tecnologia AI ou VR. Não divulgar agora é uma ofensa criminal, diz o governo chinês."
+        length = 420
+        tempText = ""
+        count = 0
+        countEnd = 0
+        dFinal[i]["texto traduzido"] = ""
+        for word in dArticle[i]["texto"].split():
+            if(count + len(word) < length):
+                tempText += word + " "
+                count += len(word + " ")
             else:
-                dFinal[i]["texto"][countParagraph] = translateConsideringAPILimit(dArticle[i]["texto"][countParagraph])
-            countParagraph += 1
-        dFinal[i]["total de palavras"] = dArticle[i]["total de palavras"]
+                if(GAMBIARRA_DO_PROBLEMA_DA_API):
+                    dFinal[i]["texto traduzido"] = "O notável analista da Apple Ming Chi Kuo tem uma nova nota de pesquisa prevendo os próximos dois anos de iPhones da Apple, e há um novo detalhe: o iPhone da Apple em 2021 matará a porta Lightning, mas os fãs de USB C (como eu) não devem muito animado. De acordo com a nota de Kuo, a Apple não substituirá a porta proprietária por USB C; em vez disso, dependerá de uma experiência totalmente sem fio para carregar e"
+                    dFinal[i]["texto traduzido"] += "sincronização, via 9to5Mac. A mudança seria grande para a Apple, que conta com a porta Lightning para todos os seus telefones desde que foi lançada no iPhone 5 em 2013. E enquanto os iPhones modernos são menos dependentes fisicamente sincronizando dados, ir para um modelo totalmente sem fio teria enormes ramificações em todo o setor de tecnologia, com tudo, desde cobrar empresas de cabo até fones de ouvido"
+                    dFinal[i]["texto traduzido"] += "fabricantes sendo impactados. Obviamente, ainda estamos muito longe de 2021 - os iPhones 2020 da Apple ainda não estão aqui - mas Kuo tem uma boa reputação por prever os planos da Apple, o que significa que é perfeitamente possível que seja assim que o futuro dos iPhones será ."
+                else:
+                    countEnd += tempText.count(".")
+                    dFinal[i]["texto traduzido"] += translateConsideringAPILimit(tempText)
+                    if countEnd >= 5:
+                        break
+                tempText = word + " "
+                count = len(word)
 
         i += 1
         if(i == 5):
+            f = open("articles.pkl", "wb")
+            pickle.dump(dFinal, f)
+            f.close()
             break
     return dFinal
+
+def getTranslatedData(dHeader, dArticle, openFileInDir = True):
+    if(openFileInDir):
+        logging.info('Carregando tradução de artigos do disco')
+
+        f = open("articles.pkl", "rb")
+        dFinal = pickle.load(f)
+        f.close()
+        return dFinal
+    else:
+        logging.info('Gerando tradução de artigos do site')
+        return constructDictionary(dHeader, dArticle)
