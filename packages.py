@@ -31,3 +31,4 @@ if(INSTALL_PACKAGES):
     installModule("pydub")
     installModule("scikit-learn")
     installTorch()
+    install("librosa")

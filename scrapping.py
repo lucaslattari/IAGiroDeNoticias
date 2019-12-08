@@ -17,9 +17,11 @@ def getTechNewsFromTheVerge(saveFileInDir, numberOfArticles):
     for tag in tqdm(divs):
         divOfArticle = tag.findAll("div", {"class": "c-entry-box--compact__body"})
         for tag in divOfArticle:
+            #pega url
             h2 = tag.find("h2", {"class": "c-entry-box--compact__title"})
             dictionary[h2.text] = h2.find("a").get("href")
 
+            #pega número de comentários
             dataComment = tag.find("div", {"class": "c-entry-stat--words"})
             if not (dataComment is None):
                 dataComment = dataComment.get("data-cdata")
@@ -50,29 +52,29 @@ def getTechNewsFromTheVerge(saveFileInDir, numberOfArticles):
 
 def convertMonthFromStrToNumber(m):
     if(m.lower() == "jan"):
-        return 1
+        return "janeiro"
     elif(m.lower() == "fev"):
-        return 2
+        return "fevereiro"
     elif(m.lower() == "mar"):
-        return 3
+        return "março"
     elif(m.lower() == "apr"):
-        return 4
+        return "abril"
     elif(m.lower() == "may"):
-        return 5
+        return "maio"
     elif(m.lower() == "jun"):
-        return 6
+        return "junho"
     elif(m.lower() == "jul"):
-        return 7
+        return "julho"
     elif(m.lower() == "aug"):
-        return 8
+        return "agosto"
     elif(m.lower() == "sep"):
-        return 9
+        return "setembro"
     elif(m.lower() == "oct"):
-        return 10
+        return "outubro"
     elif(m.lower() == "nov"):
-        return 11
+        return "novembro"
     elif(m.lower() == "dec"):
-        return 12
+        return "dezembro"
 
 def extractTextFromNews(dictionary, saveFileInDir):
     dictionaryOfArticles = {}
@@ -82,7 +84,6 @@ def extractTextFromNews(dictionary, saveFileInDir):
 
     iterations = 0
     for text, url in tqdm(dictionary.items()):
-        print(url)
         dictionaryOfArticles[iterations] = {}
         r = requests.get(url)
         soup = BeautifulSoup(r.content, 'html5lib')
@@ -90,6 +91,7 @@ def extractTextFromNews(dictionary, saveFileInDir):
         if len(divHeader) == 0:
             divHeader = soup.findAll('div', {"class": "l-root l-reskin"})
         for eachDiv in divHeader:
+
             #pega título da matéria
             h1HeaderTitle = eachDiv.findAll('h1', {"class": "c-page-title"})
             for eachH1 in h1HeaderTitle:
@@ -117,7 +119,6 @@ def extractTextFromNews(dictionary, saveFileInDir):
                 h = int(time[12:13])
                 mi = time[14:16]
                 am_pm = time[16:18]
-
             if am_pm == "pm":
                 h += 12
 
@@ -153,7 +154,6 @@ def extractTextFromNews(dictionary, saveFileInDir):
 
     return dictionaryOfArticles
 
-
 def scrapDataFromTheVerge(openFileInDir = True):
     if(openFileInDir):
         f = open("vergenews.pkl", "rb")
@@ -162,7 +162,7 @@ def scrapDataFromTheVerge(openFileInDir = True):
         f.close()
     else:
         logging.info('Carregando manchetes do site')
-        dictionaryTechNews = getTechNewsFromTheVerge(True, 5)
+        dictionaryTechNews = getTechNewsFromTheVerge(True, 10)
 
     if(openFileInDir):
         logging.info('Carregando artigos do site salvos em disco')

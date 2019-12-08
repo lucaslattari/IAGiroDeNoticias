@@ -11,8 +11,11 @@ def countdown(seconds, printMessage = True):
             print("Aguarde " + str(i) + " segundos para tentar traduzir de novo...")
         time.sleep(1)
 
-def translateConsideringAPILimit(text):
-    translator = Translator(to_lang = "pt")
+def translateConsideringAPILimit(text, en_to_pt = True):
+    if en_to_pt == "True":
+        translator = Translator(to_lang = "pt")
+    else:
+        translator = Translator(to_lang = "en")
     translated = translator.translate(text)
     if "MYMEMORY WARNING: YOU USED ALL AVAILABLE FREE TRANSLATIONS FOR TODAY. NEXT AVAILABLE IN" in translated:
         h,m,s = [int(s) for s in translated.split() if s.isdigit()]
@@ -25,10 +28,19 @@ def constructDictionary(dHeader, dArticle, GAMBIARRA_DO_PROBLEMA_DA_API = True):
     i = 0
     dFinal = {}
     for headline, url in dHeader.items():
+        print(headline)
         dFinal[i] = {}
         if(GAMBIARRA_DO_PROBLEMA_DA_API):
             if(i == 0):
-                dFinal[i]["manchete"] = "A Apple lançará um iPhone sem portas em 2021"
+                dFinal[i]["manchete"] = "Microsoft quer que todos sigam sua liderança com seu novo design móvel"
+            elif(i == 1):
+                dFinal[i]["manchete"] = "Spotify vence a Apple em seu próprio jogo com seu ano finalizado em recurso de revisão"
+            elif(i == 2):
+                dFinal[i]["manchete"] = "As queixas anteriores do MacBook Pro de 16 polegadas incluem 'estalo' do alto-falante e exibição de fantasmas"
+            elif(i == 3):
+                dFinal[i]["manchete"] = "O Galaxy S11 da Samsung supostamente possui uma câmera de 108 megapixels e uma teleobjetiva de 5x"
+            elif(i == 4):
+                dFinal[i]["manchete"] = "O Google Fiber não oferece mais seu plano mais barato para novos clientes"
         else:
             dFinal[i]["manchete"] = translateConsideringAPILimit(headline)
 
@@ -59,7 +71,7 @@ def constructDictionary(dHeader, dArticle, GAMBIARRA_DO_PROBLEMA_DA_API = True):
                 count = len(word)
 
         i += 1
-        if(i == 5):
+        if(i >= 5):
             f = open("articles.pkl", "wb")
             pickle.dump(dFinal, f)
             f.close()

@@ -1,5 +1,3 @@
-import os.path
-from os import path
 import os
 import shutil
 from os import listdir
@@ -7,12 +5,20 @@ from os.path import isfile, join
 import gpt_2_simple as gpt2
 import subprocess
 import sys
+import logging
 
 #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-run_generation = "C:\\Users\\Pichau\\github\\transformers\\examples\\run_generation.py"
+folder = "C:\\Users\\Pichau\\github\\transformers\\examples\\"
+run_generation = "run_generation.py"
 def generateTextWithTransformers(prefix, length, numSamples):
-    from random import randint
-    subprocess.run(args=['python', run_generation, '--model_type=gpt2', '--model_name_or_path=gpt2-xl', '--prompt='+prefix, '--length='+str(length), '--num_samples='+str(numSamples)], shell = True)
+    logging.debug("Texto recebido pela Transformers: " + prefix)
+
+    import random
+    if os.path.isfile(folder + "INTERRUPT_GPT2_SENTENCES"):
+        os.remove(folder + "INTERRUPT_GPT2_SENTENCES")
+        subprocess.run(args=['python', folder + run_generation, '--model_type=gpt2', '--model_name_or_path=gpt2-xl', '--prompt=' + prefix + '', '--length='+str(length), '--seed='+str(random.randint(0, 999999999)), '--num_samples='+str(numSamples), '--temperature=1.0', '--stop_token=.'], shell = True)
+    else:
+        subprocess.run(args=['python', folder + run_generation, '--model_type=gpt2', '--model_name_or_path=gpt2-xl', '--prompt=' + prefix + '', '--length='+str(length), '--seed='+str(random.randint(0, 999999999)), '--num_samples='+str(numSamples), '--temperature=1.0'], shell = True)
 
 def downloadGPT2Model(modelSize = "simple"):
     if(modelSize.lower() == "simple"):
@@ -54,3 +60,27 @@ def textGeneration(model_size = "124M"):
     gpt2.generate(sess, model_name = model_size, nsamples = 4)
     #print(text)
     #model.generate_batch_from_prompts("teste")
+
+def generateText(initialText):
+    text = initialText
+    if os.path.exists("generated.txt"):
+        os.remove("generated.txt")
+    while(True):
+        logging.debug("Texto recebido pelo GPT-2: " + text)
+        while "  " in text:
+            text = text.replace("  ", " ")
+        generateTextWithTransformers(text, 10, 20)
+
+        f = open("generated.txt", "r")
+        text = ""
+        for x in f:
+            text += x
+        text = text.replace("\n", "")
+        f.close()
+
+        logging.debug("Texto lido no arquivo: " + text)
+
+        sair = input("Deseja interromper? Digite sair para encerrar: ")
+        if(sair == "sair"):
+            break
+    return text
