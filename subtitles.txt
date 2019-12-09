@@ -1,0 +1,40 @@
+IAsmim: Fala galera! Eu sou a IAsmim e sejam bem vindos ao Xadrez Teclal, seu giro de notícias com o melhor sobre Tecnologia.
+
+GPT-2: E eu sou GPT 2, sou uma inteligência artificial capaz de fazer comentários pertinentes. Por exemplo, acho que este podcast é absolutamente fabuloso, mas não é tão bom quando o convidado é um velho branco que quer falar sobre por que odeia tudo que não é a Apple.
+
+IAsmim: Vamos então as notícias de hoje:
+IAsmim: "Microsoft quer que todos sigam sua liderança com seu novo design móvel". "Spotify vence a Apple em seu próprio jogo com seu ano finalizado em recurso de revisão". "As queixas anteriores do MacBook Pro de 16 polegadas incluem 'estalo' do alto-falante e exibição de fantasmas". 
+
+--Música de Abertura--
+
+IAsmim: O notável analista da Apple Ming Chi Kuo tem uma nova nota de pesquisa prevendo os próximos dois anos de iPhones da Apple, e há um novo detalhe: o iPhone da Apple em 2021 matará a porta Lightning, mas os fãs de USB C (como eu) não devem muito animado. De acordo com a nota de Kuo, a Apple não substituirá a porta proprietária por USB C; em vez disso, dependerá de uma experiência totalmente sem fio para carregar esincronização, via 9to5Mac. A mudança seria grande para a Apple, que conta com a porta Lightning para todos os seus telefones desde que foi lançada no iPhone 5 em 2013.
+Para mais detalhes veja o link que está na descrição.
+A matéria foi escrita por Tom Warren para o The Verge no dia 5 do 12 de 2019.......
+O quê você acha disso, GPT-2?
+
+GPT-2: acredito muito na idéia de uma boa experiência do usuário e não importa se a empresa é Microsoft, Apple, Google ou algum outro jogador importante.
+
+IAsmim: Como acontece todos os anos, hoje o Spotify deu aos usuários um lembrete de seu passado com seu ano "Embrulhado" na revisão. E parece que todo mundo está compartilhando suas principais músicas e artistas do ano passado no Instagram, Twitter e outras redes sociais - bem, todos, menos os ouvintes da Apple Music. Os usuários do Spotify podem revisitar seus principais artistas do ano, suas principais músicas e, porque 2019 também marca o final de uma década, suas músicas mais consumidas nos últimos 10 anos.
+Para mais detalhes veja o link que está na descrição.
+A matéria foi escrita por Ashley Carman para o The Verge no dia 5 do 12 de 2019.......
+O quê você acha disso, GPT-2?
+
+GPT-2: Eu não tenho ideia do que isso significa. Estamos em uma guerra entre Apple e Spotify? Parece que o recurso de revisão da Apple agora é mais proeminente que o tocador de música do Spotify.
+
+IAsmim: O novo MacBook Pro de 16 polegadas finalmente corrigiu o fracasso do teclado da Apple, e é uma besta de uma máquina em termos de desempenho. Mas os primeiros compradores ainda conseguiram descobrir alguns bugs com o mais recente MacBook Pro - e uma característica de hardware que pode afastar algumas pessoas. Conforme observado pelo AppleInsider (e apoiado por esse longo tópico no fórum MacRumors), os proprietários do MacBook Pro de 16 polegadas estão reclamando de um som intermitente de "estalo" vindo dos alto-falantes.
+Para mais detalhes veja o link que está na descrição.
+A matéria foi escrita por Chris Welch para o The Verge no dia 5 do 12 de 2019.......
+O quê você acha disso, GPT-2?
+
+GPT-2: Eu não entendo. A Apple nunca forneceu um único exemplo de ruído de áudio ou fantasma (ou seja, uma imagem não visível a olho nu).
+
+IAsmim: Muito obrigado por vocês terem acompanhado até aqui. Para encerrar, minha amiga GPT-2 vai contar uma piada de encerramento!
+
+GPT-2: A piada do dia é que o "mundo real" se tornou mais "baseado na realidade" nas últimas décadas e isso não é uma coisa ruim, mas acho que devemos ter isso em mente. A realidade é que a maioria do que consideramos "real" não é de fato "realidade".
+
+IAsmim: Antes de ir, GPT-2, dê uma dica cultural pro pessoal!
+
+GPT-2: A dica do dia é o livro de Jó, que, se você é cristão, impedirá que você tenha mais alguma esperança em sua vida. Para aqueles que não são cristãos, gostaria de deixar uma coisa clara: é um ótimo livro. Não é um livro ruim, lembre-se (embora eu não o tenha lido), mas um ótimo livro.
+
+IAsmim: Obrigado e até a próxima!
+--Música de Encerramento--

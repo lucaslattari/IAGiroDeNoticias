@@ -95,7 +95,7 @@ def extractTextFromNews(dictionary, saveFileInDir):
             #pega título da matéria
             h1HeaderTitle = eachDiv.findAll('h1', {"class": "c-page-title"})
             for eachH1 in h1HeaderTitle:
-                dictionaryOfArticles[iterations]["titulo"] = eachH1.text
+                dictionaryOfArticles[iterations]["titulo"] = eachH1.text.replace("\"", "")
             logging.debug(eachH1.text)
 
             #pega autor da matéria
@@ -134,7 +134,7 @@ def extractTextFromNews(dictionary, saveFileInDir):
             paragrafos = 0
             dictionaryOfArticles[iterations]["texto"] = ""
             for p in allP:
-                textParagraph = p.text
+                textParagraph = p.text.replace("\"", "")
                 if not textParagraph:
                     continue
                 if "   Related" in textParagraph:

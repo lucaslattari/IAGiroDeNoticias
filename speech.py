@@ -23,6 +23,7 @@ def saveMP3OfTextGoogle(speechText, mp3File):
 
 def saveMP3OfTextMicrosoft(speechText, mp3File):
     f = open("gpt2.vbs","w+")
+    speechText = speechText.replace("\"", "")
     f.writelines(["Const SAFT48kHz16BitStereo = 39\n",
         "Const SSFMCreateForWrite = 3\n",
         "Dim oFileStream, oVoice\n",
@@ -43,6 +44,7 @@ def saveMP3OfTextMicrosoft(speechText, mp3File):
     #os.remove("gpt2.vbs")
 
 def speechNews(speech, filename, whoIsTalking):
+    speech += "......"
     if whoIsTalking == "iasmim":
         saveMP3OfTextGoogle(speech, filename)
         #changePitch(filename, 2)

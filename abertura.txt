@@ -1,3 +1,3 @@
-1 Fala galera! Eu sou a IAsmim e sejam bem vindos ao Xadrez Teclal, seu giro de notícias com o melhor sobre Tecnologia......
-2 E eu sou a GPT-2, sou uma inteligência artificial capaz de fazer comentários pertinentes. Por exemplo:
-1 Vamos então as notícias de hoje:....
+1 Fala galera! Eu sou a IAsmim e sejam bem vindos ao Xadrez Teclal, seu giro de notícias com o melhor sobre Tecnologia.
+2 E eu sou a GPT-2, sou uma inteligência artificial capaz de fazer comentários pertinentes. Por exemplo: %comentariogpt2%
+1 Vamos então as notícias de hoje:

@@ -10,15 +10,17 @@ import logging
 #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 folder = "C:\\Users\\Pichau\\github\\transformers\\examples\\"
 run_generation = "run_generation.py"
-def generateTextWithTransformers(prefix, length, numSamples):
+def generateTextWithTransformers(prefix, length, numSamples, prob):
     logging.debug("Texto recebido pela Transformers: " + prefix)
 
     import random
-    if os.path.isfile(folder + "INTERRUPT_GPT2_SENTENCES"):
-        os.remove(folder + "INTERRUPT_GPT2_SENTENCES")
-        subprocess.run(args=['python', folder + run_generation, '--model_type=gpt2', '--model_name_or_path=gpt2-xl', '--prompt=' + prefix + '', '--length='+str(length), '--seed='+str(random.randint(0, 999999999)), '--num_samples='+str(numSamples), '--temperature=1.0', '--stop_token=.'], shell = True)
+    if os.path.isfile("INTERRUPT_GPT2_SENTENCES"):
+        os.remove("INTERRUPT_GPT2_SENTENCES")
+        subprocess.run(args=['python', folder + run_generation, '--model_type=gpt2', '--model_name_or_path=gpt2-xl', '--prompt=' + prefix + '', '--length='+str(length), '--seed='+str(random.randint(0, 999999999)), '--num_samples='+str(numSamples), '--temperature=1.0','--prob=' + str(prob), '--stop_token=.'], shell = True)
+        return True
     else:
-        subprocess.run(args=['python', folder + run_generation, '--model_type=gpt2', '--model_name_or_path=gpt2-xl', '--prompt=' + prefix + '', '--length='+str(length), '--seed='+str(random.randint(0, 999999999)), '--num_samples='+str(numSamples), '--temperature=1.0'], shell = True)
+        subprocess.run(args=['python', folder + run_generation, '--model_type=gpt2', '--model_name_or_path=gpt2-xl', '--prompt=' + prefix + '', '--length='+str(length), '--seed='+str(random.randint(0, 999999999)), '--num_samples='+str(numSamples), '--prob=' + str(prob), '--temperature=1.0'], shell = True)
+        return False
 
 def downloadGPT2Model(modelSize = "simple"):
     if(modelSize.lower() == "simple"):
@@ -62,25 +64,27 @@ def textGeneration(model_size = "124M"):
     #model.generate_batch_from_prompts("teste")
 
 def generateText(initialText):
-    text = initialText
+    prob = 0.0
+    text = ""
     if os.path.exists("generated.txt"):
         os.remove("generated.txt")
     while(True):
         logging.debug("Texto recebido pelo GPT-2: " + text)
-        while "  " in text:
-            text = text.replace("  ", " ")
-        generateTextWithTransformers(text, 10, 20)
+        endProcedure = generateTextWithTransformers(initialText + text, 10, 20, prob)
 
         f = open("generated.txt", "r")
-        text = ""
         for x in f:
             text += x
         text = text.replace("\n", "")
+        text = text.replace("  ", "")
         f.close()
 
         logging.debug("Texto lido no arquivo: " + text)
-
-        sair = input("Deseja interromper? Digite sair para encerrar: ")
-        if(sair == "sair"):
-            break
-    return text
+        if(endProcedure):
+            f = open("generated.txt", "w")
+            text = text.replace("\"", "")
+            f.write(text)
+            f.close()
+            return text
+        #sair = input("Deseja interromper? Digite sair para encerrar: ")
+        prob += 0.15
