@@ -1,5 +1,0 @@
-1 Muito obrigado por vocês terem acompanhado até aqui. Para encerrar, minha amiga GPT-2 vai contar uma piada de encerramento!
-2 A piada do dia é %comentariogpt2%
-1 Antes de ir, GPT-2, dê uma dica cultural pro pessoal!
-2 A dica do dia é o livro %comentariogpt2%
-1 Obrigado e até a próxima!

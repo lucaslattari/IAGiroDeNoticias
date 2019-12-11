@@ -8,6 +8,14 @@ import translateNews as trans
 import speech
 import textgeneration as tg
 from pydub import AudioSegment
+import video
+
+def saveMP3Duration(mp3File):
+    from mutagen.mp3 import MP3
+    audio = MP3(mp3File)
+    f = open("mp3duration.txt", "a+")
+    f.write(str(audio.info.length) + " : " + mp3File + "\n")
+    f.close()
 
 def generatePodcastEndingMP3Files(file, GAMBIARRA_DO_PROBLEMA_DA_API = True):
     listOfFiles = []
@@ -22,6 +30,7 @@ def generatePodcastEndingMP3Files(file, GAMBIARRA_DO_PROBLEMA_DA_API = True):
             fSub.write("IAsmim: " + line)
             fSub.write("\n")
             speech.speechNews(line, mp3File, "iasmim")
+            saveMP3Duration(mp3File)
         else:
             line = line[2:]
             if "%comentariogpt2" in line:
@@ -49,6 +58,7 @@ def generatePodcastEndingMP3Files(file, GAMBIARRA_DO_PROBLEMA_DA_API = True):
             fSub.write("GPT-2: " + gpt2Talk)
             fSub.write("\n")
             speech.speechNews(gpt2Talk, mp3File, "GPT2")
+            saveMP3Duration(mp3File)
         talks += 1
         AudioSegment.from_mp3(mp3File)
     return listOfFiles
@@ -66,6 +76,7 @@ def generatePodcastOpeningMP3Files(file, GAMBIARRA_DO_PROBLEMA_DA_API = True):
             fSub.write("IAsmim: " + line)
             fSub.write("\n")
             speech.speechNews(line, mp3File, "iasmim")
+            saveMP3Duration(mp3File)
         else:
             line = line[2:]
             if "%comentariogpt2" in line:
@@ -87,6 +98,7 @@ def generatePodcastOpeningMP3Files(file, GAMBIARRA_DO_PROBLEMA_DA_API = True):
             fSub.write("GPT-2: " + gpt2Talk)
             fSub.write("\n")
             speech.speechNews(gpt2Talk, mp3File, "GPT2")
+            saveMP3Duration(mp3File)
         AudioSegment.from_mp3(mp3File)
         talks += 1
     return listOfFiles
@@ -101,6 +113,7 @@ def generateHeadlines(dFinal):
     fSub.write("IAsmim: " + headlines)
     fSub.write("\n")
     speech.speechNews(headlines, mp3File, "iasmim")
+    saveMP3Duration(mp3File)
     return mp3File
 
 import codecs
@@ -127,6 +140,7 @@ def generateNewsByID(dFinal, idNews):
     fSub.write("IAsmim: " + talk)
     fSub.write("\n")
     speech.speechNews(talk, mp3File, "iasmim")
+    saveMP3Duration(mp3File)
     return mp3File
 
 def generateGPT2Comment(prefix, idNews, GAMBIARRA_DO_PROBLEMA_DA_API = True):
@@ -149,6 +163,7 @@ def generateGPT2Comment(prefix, idNews, GAMBIARRA_DO_PROBLEMA_DA_API = True):
     fSub.write("GPT-2: " + text)
     fSub.write("\n")
     speech.speechNews(text, mp3File, "GPT2")
+    saveMP3Duration(mp3File)
     return mp3File
 
 def concatenateMP3s(mp3List):
@@ -168,9 +183,9 @@ def concatenateMP3s(mp3List):
 
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-    dHeader, dArticle = scrap.scrapDataFromTheVerge()
-    dFinal = trans.getTranslatedData(dHeader, dArticle, False)
 
+    dHeader, dArticle = scrap.scrapDataFromTheVerge()
+    dFinal = trans.getTranslatedData(dHeader, dArticle)
     logging.info('Gerando abertura do podcast em MP3')
     mp3FilesList = generatePodcastOpeningMP3Files("abertura.txt")
     logging.info('Gerando anúncio das notícias em MP3')
@@ -197,6 +212,8 @@ def main():
     logging.info('Sintetizando programa final em MP3')
     concatenateMP3s(mp3FilesList)
 
+    video.synthetizeVideo("final.mp3")
+
     #opening = tg.generateText("")
 
     #tg.downloadGPT2Model()
@@ -206,6 +223,8 @@ def main():
     #tg.textGeneration()
 
 if __name__ == "__main__":
+    open("mp3duration.txt", 'w').close()
+
     fSub = open("subtitles.txt", "w")
     main()
     fSub.close()

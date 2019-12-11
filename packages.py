@@ -32,3 +32,5 @@ if(INSTALL_PACKAGES):
     installModule("scikit-learn")
     installTorch()
     install("librosa")
+    install("opencv-python")
+    install("mutagen")
