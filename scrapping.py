@@ -35,8 +35,6 @@ def getTechNewsFromTheVerge(saveFileInDir, numberOfArticles):
     newDict = {}
     ii = 1
     for key, comments in sorted(dTempComment.items(), key=lambda i: i[1], reverse=True):
-        if ii == 0:
-            continue
         for name, url in dictionary.items():
             if(name == key):
                 newDict[name] = {}
