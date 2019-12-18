@@ -1,3 +1,4 @@
+# coding: utf-8
 #!/usr/bin/python
 
 from http import client
@@ -8,6 +9,7 @@ import random
 import sys
 import time
 import subprocess
+import logging
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -20,9 +22,16 @@ import os.path
 def uploadYoutubeVideo(videoFilename):
     import datetime
     now = datetime.datetime.now()
-    titulo = "Giro de Notícias de " + str(now.day) + "/" + str(now.month) + "/" + str(now.year)
-    #command = 'python.exe ' + folder + 'youtube.py'
-    subprocess.run(args=['python', 'youtube.py', '--file=' + videoFilename, '--title=' + titulo, '--description=Xadrez Teclal, seu giro de notícias com o melhor da tecnologia!', '--category=28', '--keywords=tecnologia,notícias,amazon,microsoft,google,facebook', "--privacyStatus=unlisted"])
+    titulo = "Giro de Notícias de " + str(now.day) + "/" + str(now.month) + "/" + str(now.year) + " (BETA)"
+    logging.info(titulo)
+
+    f = open("descricao", "r")
+    descricao = f.readlines()
+    f.close()
+    descricao = descricao[0] + "\n" + descricao[1] + "\n" + descricao[2]
+    logging.info(descricao)
+
+    subprocess.run(args=['python', 'youtube.py', '--file=' + videoFilename, '--title=' + titulo, '--description=' + descricao, '--category=28', '--keywords=tecnologia,notícias,amazon,microsoft,google,facebook,universo discreto, podcast, bots, xadrez teclal', "--privacyStatus=unlisted"])
 
 # Explicitly tell the underlying HTTP transport library not to retry, since
 # we are handling retry logic ourselves.
@@ -143,6 +152,8 @@ def resumable_upload(insert_request):
       if response is not None:
         if 'id' in response:
           print ("Video id '%s' was successfully uploaded." % response['id'])
+          import webbrowser
+          webbrowser.open('http://youtu.be/' + response['id'])
         else:
           exit("The upload failed with an unexpected response: %s" % response)
     except HttpError as e:

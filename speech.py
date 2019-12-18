@@ -1,8 +1,10 @@
+# coding: utf-8
 from gtts import gTTS
 import os
 import pydub
 from pydub import AudioSegment
 import librosa
+import stringUtils as s
 
 def changePitch(filename, steps):
     sound = AudioSegment.from_mp3(filename)
@@ -14,8 +16,7 @@ def changePitch(filename, steps):
 
     sound = AudioSegment.from_file("temp.wav")
     sound.export(filename, format="mp3")
-
-    #os.remove("temp.wav")
+    os.remove("temp.wav")
 
 def saveMP3OfTextGoogle(speechText, mp3File):
     tts = gTTS(text=speechText, lang='pt-br', slow=False)
@@ -23,7 +24,9 @@ def saveMP3OfTextGoogle(speechText, mp3File):
 
 def saveMP3OfTextMicrosoft(speechText, mp3File):
     f = open("gpt2.vbs","w+")
+    speechText = s.cleanSentence(speechText)
     speechText = speechText.replace("\"", "")
+    speechText = speechText.replace("\'", "")
     f.writelines(["Const SAFT48kHz16BitStereo = 39\n",
         "Const SSFMCreateForWrite = 3\n",
         "Dim oFileStream, oVoice\n",

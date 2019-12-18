@@ -1,3 +1,4 @@
+# coding: utf-8
 import packages
 import requests
 from bs4 import BeautifulSoup
@@ -6,6 +7,8 @@ import re
 from tqdm import tqdm
 import logging
 import re
+import stringUtils as s
+import os.path
 
 def getTechNewsFromTheVerge(saveFileInDir, numberOfArticles):
     dictionary = {}
@@ -32,10 +35,13 @@ def getTechNewsFromTheVerge(saveFileInDir, numberOfArticles):
     newDict = {}
     ii = 1
     for key, comments in sorted(dTempComment.items(), key=lambda i: i[1], reverse=True):
+        if ii == 0:
+            continue
         for name, url in dictionary.items():
             if(name == key):
                 newDict[name] = {}
                 newDict[name] = dictionary[name]
+
         if(ii == numberOfArticles):
             break
         ii += 1
@@ -95,7 +101,10 @@ def extractTextFromNews(dictionary, saveFileInDir):
             #pega título da matéria
             h1HeaderTitle = eachDiv.findAll('h1', {"class": "c-page-title"})
             for eachH1 in h1HeaderTitle:
-                dictionaryOfArticles[iterations]["titulo"] = eachH1.text.replace("\"", "")
+                temp = s.cleanSentence(eachH1.text)
+                if(isinstance(temp, list)):
+                    temp = temp[0]
+                dictionaryOfArticles[iterations]["titulo"] = s.cleanSentence(eachH1.text)
             logging.debug(eachH1.text)
 
             #pega autor da matéria
@@ -129,12 +138,11 @@ def extractTextFromNews(dictionary, saveFileInDir):
             #pega texto da reportagem
             divText = soup.find('div', {"class": "c-entry-content"})
             allP = divText.findAll('p')
-            conteudo = ""
             totalDePalavras = 0
             paragrafos = 0
             dictionaryOfArticles[iterations]["texto"] = ""
             for p in allP:
-                textParagraph = p.text.replace("\"", "")
+                textParagraph = s.cleanSentence(p.text)
                 if not textParagraph:
                     continue
                 if "   Related" in textParagraph:
@@ -142,7 +150,9 @@ def extractTextFromNews(dictionary, saveFileInDir):
                 if(textParagraph.startswith(listToIgnore)):
                     continue
 
-                conteudo += p.text + "\n"
+                if(isinstance(textParagraph, list)):
+                    textParagraph = textParagraph[0]
+
                 dictionaryOfArticles[iterations]["texto"] += textParagraph
             logging.debug(dictionaryOfArticles[iterations]["texto"])
             iterations += 1
@@ -154,19 +164,28 @@ def extractTextFromNews(dictionary, saveFileInDir):
 
     return dictionaryOfArticles
 
-def scrapDataFromTheVerge(openFileInDir = True):
-    if(openFileInDir):
-        f = open("vergenews.pkl", "rb")
+def scrapDataFromTheVerge():
+    if(os.path.isfile('vergenews.pkl')):
         logging.info('Carregando manchetes do site salvos em disco')
+        try:
+            f = open("vergenews.pkl", "rb")
+        except IOError:
+            logging.error("ERRO: Arquivo vergenews.pkl não encontrado")
+            exit()
+
         dictionaryTechNews = pickle.load(f)
         f.close()
     else:
         logging.info('Carregando manchetes do site')
         dictionaryTechNews = getTechNewsFromTheVerge(True, 10)
 
-    if(openFileInDir):
+    if(os.path.isfile('vergearticles.pkl')):
         logging.info('Carregando artigos do site salvos em disco')
-        f = open("vergearticles.pkl", "rb")
+        try:
+            f = open("vergearticles.pkl", "rb")
+        except IOError:
+            logging.error("ERRO: Arquivo vergearticles.pkl não encontrado")
+            exit()
         dictionaryArticles = pickle.load(f)
         f.close()
     else:

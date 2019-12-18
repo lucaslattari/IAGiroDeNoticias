@@ -1,3 +1,4 @@
+# coding: utf-8
 import os
 import logging
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = "2"
@@ -10,6 +11,11 @@ import textgeneration as tg
 from pydub import AudioSegment
 import video
 import youtube as yt
+import time
+import os.path
+from os import path
+import re
+import stringUtils as s
 
 def saveMP3Duration(mp3File):
     from mutagen.mp3 import MP3
@@ -18,103 +24,86 @@ def saveMP3Duration(mp3File):
     f.write(str(audio.info.length) + " : " + mp3File + "\n")
     f.close()
 
-def generatePodcastEndingMP3Files(file, GAMBIARRA_DO_PROBLEMA_DA_API = True):
+def generatePodcastDialogMP3Files(dialogName):
     listOfFiles = []
-    f = open(file, "r")
+    ff = open(dialogName, "r")
     talks = 0
-    for line in f:
+    talksGPT2 = 0
+    for line in ff:
         if(line[0] == '1'):
-            mp3File = "ending" + str(talks) + "_iasmim.mp3"
+            mp3File = dialogName + str(talks) + "_iasmim.mp3"
             line = line[2:]
             listOfFiles.append(mp3File)
             logging.info("IAsmim: " + line)
-            fSub.write("IAsmim: " + line)
-            fSub.write("\n")
+            fSub = open("subtitles", "a")
+            fSub.write("\nIAsmim: " + line + "\n")
+            fSub.close()
+            logging.info("Salvando arquivo " + mp3File)
             speech.speechNews(line, mp3File, "iasmim")
             saveMP3Duration(mp3File)
         else:
+            mp3File = dialogName + str(talks) + "_gpt2.mp3"
             line = line[2:]
-            mp3File = "ending" + str(talks) + "_gpt2.mp3"
             if "%comentariogpt2" in line:
-                if GAMBIARRA_DO_PROBLEMA_DA_API == True:
-                    if talks == 1:
-                        gpt2Talk = "The joke of the day is"
-                    elif talks == 3:
-                        gpt2Talk = "The tip of the day is the book"
-                else:
-                    gpt2Talk = translateConsideringAPILimit(line, False)
+                line = line.replace("%comentariogpt2%", "")
+                if path.exists("traduzidos/" + dialogName + "_gpt2_" + str(talksGPT2) + "ingles") == False:
+                    gpt2Talk = trans.translateConsideringAPILimit(line, "pt_to_en")
+                    logging.info("Tradução da GPT-2: " + gpt2Talk)
                     gpt2Talk += tg.generateText(gpt2Talk)
-                if GAMBIARRA_DO_PROBLEMA_DA_API == True:
-                    if talks == 1:
-                        gpt2Talk = "A piada do dia é que o \"mundo real\" se tornou mais \"baseado na realidade\" nas últimas décadas e isso não é uma coisa ruim, mas acho que devemos ter isso em mente. A realidade é que a maioria do que consideramos \"real\" não é de fato \"realidade\"."
-                    elif talks == 3:
-                        gpt2Talk = "A dica do dia é o livro de Jó, que, se você é cristão, impedirá que você tenha mais alguma esperança em sua vida. Para aqueles que não são cristãos, gostaria de deixar uma coisa clara: é um ótimo livro. Não é um livro ruim, lembre-se (embora eu não o tenha lido), mas um ótimo livro."
+                    f = open("traduzidos/" + dialogName + "_gpt2_" + str(talksGPT2) + "ingles", "a")
+                    f.write(gpt2Talk)
+                    f.close()
                 else:
-                    pass
-                    #gpt2Talk = translateConsideringAPILimit(gpt2Talks)
-            else:
-                gpt2Talk = line[2:]
-            listOfFiles.append(mp3File)
-            logging.info("GPT-2: " + gpt2Talk)
-            fSub.write("GPT-2: " + gpt2Talk)
-            fSub.write("\n")
-            speech.speechNews(gpt2Talk, mp3File, "GPT2")
-            saveMP3Duration(mp3File)
-        talks += 1
-        AudioSegment.from_mp3(mp3File)
-    return listOfFiles
+                    f = open("traduzidos/" + dialogName + "_gpt2_" + str(talksGPT2) + "ingles", "r")
+                    gpt2Talk = f.readlines()
+                    if(isinstance(gpt2Talk, list)):
+                        gpt2Talk = gpt2Talk[0]
+                    f.close()
 
-def generatePodcastOpeningMP3Files(file, GAMBIARRA_DO_PROBLEMA_DA_API = True):
-    listOfFiles = []
-    f = open(file, "r")
-    talks = 0
-    for line in f:
-        if(line[0] == '1'):
-            mp3File = "opening" + str(talks) + "_iasmim.mp3"
-            line = line[2:]
-            listOfFiles.append(mp3File)
-            logging.info("IAsmim: " + line)
-            fSub.write("IAsmim: " + line)
-            fSub.write("\n")
-            speech.speechNews(line, mp3File, "iasmim")
-            saveMP3Duration(mp3File)
-        else:
-            mp3File = "opening" + str(talks) + "_gpt2.mp3"
-            line = line[2:]
-            if "%comentariogpt2" in line:
-                if GAMBIARRA_DO_PROBLEMA_DA_API == True:
-                    gpt2Talk = "And I am GPT 2, I am an artificial intelligence capable of making pertinent comments. For example, I think this podcast"
+                if path.exists("traduzidos/" + dialogName + "_gpt2_" + str(talksGPT2) + "portugues") == False:
+                    logging.info(gpt2Talk)
+                    gpt2Talk = trans.translateConsideringAPILimit(gpt2Talk, "en_to_pt")
+                    f = open("traduzidos/" + dialogName + "_gpt2_" + str(talksGPT2) + "portugues", "a")
+                    f.write(gpt2Talk)
+                    f.close()
                 else:
-                    pass
-                    #gpt2Talk = translateConsideringAPILimit(line, False)
-                    #gpt2Talk += tg.generateText(gpt2Talk)
-                if GAMBIARRA_DO_PROBLEMA_DA_API == True:
-                    gpt2Talk = "E eu sou GPT 2, sou uma inteligência artificial capaz de fazer comentários pertinentes. Por exemplo, acho que este podcast é absolutamente fabuloso, mas não é tão bom quando o convidado é um velho branco que quer falar sobre por que odeia tudo que não é a Apple."
-                else:
-                    pass
-                    #gpt2Talk = translateConsideringAPILimit(gpt2Tals)
+                    f = open("traduzidos/" + dialogName + "_gpt2_" + str(talksGPT2) + "portugues", "r")
+                    gpt2Talk = f.readlines()
+                    if(isinstance(gpt2Talk, list)):
+                        gpt2Talk = gpt2Talk[0]
+                    f.close()
+                talksGPT2 += 1
             else:
                 gpt2Talk = line[2:]
             listOfFiles.append(mp3File)
             logging.info("GPT-2: " + gpt2Talk)
-            fSub.write("GPT-2: " + gpt2Talk)
-            fSub.write("\n")
+            fSub = open("subtitles", "a")
+            fSub.write("\nGPT-2: " + gpt2Talk + "\n")
+            fSub.close()
+            logging.info("Salvando arquivo " + mp3File)
             speech.speechNews(gpt2Talk, mp3File, "GPT2")
             saveMP3Duration(mp3File)
         AudioSegment.from_mp3(mp3File)
         talks += 1
+    ff.close()
     return listOfFiles
 
 def generateHeadlines(dFinal):
     headlines = ""
     for i in range(3):
         if "manchete" in dFinal[i]:
-            headlines += "\"" + dFinal[i]["manchete"] + "\". "
+            if(i < 2):
+                headlines += dFinal[i]["manchete"] + " , "
+            else:
+                headlines += dFinal[i]["manchete"]
     mp3File = "headlines_iasmim.mp3"
     logging.info("IAsmim: " + headlines)
-    fSub.write("IAsmim: " + headlines)
+    fSub = open("subtitles", "a")
+    fSub.write("\nIAsmim: " + headlines)
     fSub.write("\n")
+    fSub.close()
     speech.speechNews(headlines, mp3File, "iasmim")
+    logging.info("Salvando arquivo " + mp3File)
     saveMP3Duration(mp3File)
     return mp3File
 
@@ -122,7 +111,8 @@ import codecs
 def generateNewsByID(dFinal, idNews):
     talk = ""
     mp3File = "news" + str(idNews) + "_iasmim.mp3"
-    with codecs.open("noticia.txt", 'r', encoding='utf8') as fp:
+    logging.debug(dFinal[idNews]["texto original"])
+    with codecs.open("noticia", 'r', encoding='utf8') as fp:
         line = fp.readline()
         if '%texto traduzido%' in line:
             line = line.replace("%texto traduzido%", dFinal[idNews]["texto traduzido"])
@@ -139,31 +129,55 @@ def generateNewsByID(dFinal, idNews):
                 line = line.replace("%ano%", str(dFinal[idNews]["data"]["ano"]))
             talk += line
     logging.info("IAsmim: " + talk)
-    fSub.write("IAsmim: " + talk)
+    fSub = open("subtitles", "a")
+    fSub.write("\nIAsmim: " + talk)
     fSub.write("\n")
+    fSub.close()
     speech.speechNews(talk, mp3File, "iasmim")
     saveMP3Duration(mp3File)
     return mp3File
 
-def generateGPT2Comment(prefix, idNews, GAMBIARRA_DO_PROBLEMA_DA_API = True):
+def generateGPT2Comment(prefix, idNews):
     prefixToGPT2 = ""
     mp3File = "comment" + str(idNews) + "_gpt2.mp3"
-    if(GAMBIARRA_DO_PROBLEMA_DA_API):
-        prefixToGPT2 = "About \"Previous complaints of the 16-inch MacBook Pro include speaker 'crackling' and ghost display\" I have to say that:"
-        if idNews == 0:
-            text = "acredito muito na idéia de uma boa experiência do usuário e não importa se a empresa é Microsoft, Apple, Google ou algum outro jogador importante."
-        elif idNews == 1:
-            text = "Eu não tenho ideia do que isso significa. Estamos em uma guerra entre Apple e Spotify? Parece que o recurso de revisão da Apple agora é mais proeminente que o tocador de música do Spotify."
-        else:
-            text = "Eu não entendo. A Apple nunca forneceu um único exemplo de ruído de áudio ou fantasma (ou seja, uma imagem não visível a olho nu)."
-    else:
-        prefix = prefix.replace("\"", "")
-        prefixToGPT2 = translateConsideringAPILimit(prefix, False)
+
+    prefix = s.cleanSentence(prefix)
+    if path.exists("traduzidos/comentarios_gpt2_" + str(idNews) + "ingles") == False:
+        prefixToGPT2 = trans.translateConsideringAPILimit(prefix, "pt_to_en")
+        logging.info(prefixToGPT2)
+
         text = tg.generateText(prefixToGPT2)
-        text = translateConsideringAPILimit(text)
+        logging.info(text)
+
+        f = open("traduzidos/comentarios_gpt2_" + str(idNews) + "ingles", "a")
+        f.write(text)
+        f.close()
+    else:
+        f = open("traduzidos/comentarios_gpt2_" + str(idNews) + "ingles", "r")
+        text = f.readlines()
+        if(isinstance(text, list)):
+            text = text[0]
+        f.close()
+
+    if path.exists("traduzidos/comentarios_gpt2_" + str(idNews) + "portugues") == False:
+        text = trans.translateConsideringAPILimit(text, "en_to_pt")
+        logging.info(text)
+
+        f = open("traduzidos/comentarios_gpt2_" + str(idNews) + "portugues", "a")
+        f.write(text)
+        f.close()
+    else:
+        f = open("traduzidos/comentarios_gpt2_" + str(idNews) + "portugues", "r")
+        text = f.readlines()
+        if(isinstance(text, list)):
+            text = text[0]
+        f.close()
+
     logging.info("GPT-2: " + text)
-    fSub.write("GPT-2: " + text)
+    fSub = open("subtitles", "a")
+    fSub.write("\nGPT-2: " + text)
     fSub.write("\n")
+    fSub.close()
     speech.speechNews(text, mp3File, "GPT2")
     saveMP3Duration(mp3File)
     return mp3File
@@ -186,18 +200,25 @@ def concatenateMP3s(mp3List):
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
-    '''
+    logging.info("Extraindo dados de sites")
     dHeader, dArticle = scrap.scrapDataFromTheVerge()
+
+    logging.info("Traduzindo textos")
     dFinal = trans.getTranslatedData(dHeader, dArticle)
 
+    fSub = open("subtitles", "w").close()
     open("mp3duration", 'w').close()
     logging.info('Gerando abertura do podcast em MP3')
-    mp3FilesList = generatePodcastOpeningMP3Files("abertura.txt")
+    mp3FilesList = generatePodcastDialogMP3Files("abertura")
+
     logging.info('Gerando anúncio das notícias em MP3')
     mp3FilesList.append(generateHeadlines(dFinal))
+
     logging.info('Adicionando música de abertura')
-    fSub.write("Música de Abertura!")
+    fSub = open("subtitles", "a")
+    fSub.write("\n-Música de Abertura-\n")
     fSub.write("\n")
+    fSub.close()
     mp3FilesList.append("intro_music.mp3")
     saveMP3Duration("intro_music.mp3")
 
@@ -206,24 +227,50 @@ def main():
         mp3File = generateNewsByID(dFinal, i)
         mp3FilesList.append(mp3File)
 
-        mp3File = generateGPT2Comment("Sobre \"" + dFinal[i]["manchete"] + "\" eu tenho a dizer que: ", i)
+        mp3File = generateGPT2Comment("Sobre " + dFinal[i]["manchete"] + " eu tenho a dizer que: ", i)
         mp3FilesList.append(mp3File)
+
     logging.info('Gerando encerramento do podcast em MP3')
-    mp3Files = generatePodcastEndingMP3Files("encerramento.txt")
+    mp3Files = generatePodcastDialogMP3Files("encerramento")
     mp3FilesList = mp3FilesList + mp3Files
+
     logging.info('Adicionando música de encerramento')
-    fSub.write("Música de Encerramento!")
+    fSub = open("subtitles", "a")
+    fSub.write("\n-Música de Encerramento-")
     fSub.write("\n")
+    fSub.close()
     mp3FilesList.append("ending_music.mp3")
-    saveMP3Duration("intro_music.mp3")
+    saveMP3Duration("ending_music.mp3")
     logging.info('Sintetizando programa final em MP3')
     concatenateMP3s(mp3FilesList)
 
     logging.info('Sintetizando vídeo em formato AVI')
     video.synthetizeVideo("final.mp3", "final.avi")
-    '''
+
+    f = open("descricao", "w")
+    f.write("Link da primeira notícia: " + dFinal[0]["url"])
+    f.write("\nLink da segunda notícia: " + dFinal[1]["url"])
+    f.write("\nLink da terceira notícia: " + dFinal[2]["url"])
+    f.close()
 
     yt.uploadYoutubeVideo("final.mp4")
+
+    os.remove("generated.txt")
+    os.remove("descricao")
+    os.remove("encerramento")
+    os.remove("mp3duration")
+    os.remove("gpt2.vbs")
+    os.remove("final.mp4")
+    os.remove("final.avi")
+    os.remove("temp.wav")
+    for root, dirs, files in os.walk('.'):
+        for filename in files:
+            if os.path.splitext(filename)[1] == ".mp3":
+                if((filename != 'intro_music.mp3') and (filename != 'ending_music.mp3')):
+                    os.remove(filename)
+            elif os.path.splitext(filename)[1] == ".pkl":
+                os.remove(filename)
+
     #opening = tg.generateText("")
 
     #tg.downloadGPT2Model()
@@ -233,6 +280,4 @@ def main():
     #tg.textGeneration()
 
 if __name__ == "__main__":
-    fSub = open("subtitles.txt", "w")
     main()
-    fSub.close()

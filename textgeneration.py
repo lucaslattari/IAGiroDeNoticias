@@ -1,3 +1,4 @@
+# coding: utf-8
 import os
 import shutil
 from os import listdir
@@ -6,12 +7,15 @@ import gpt_2_simple as gpt2
 import subprocess
 import sys
 import logging
+import stringUtils as s
+import re
 
 #os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 folder = "C:\\Users\\Pichau\\github\\transformers\\examples\\"
 run_generation = "run_generation.py"
-def generateTextWithTransformers(prefix, length, numSamples, prob):
-    logging.debug("Texto recebido pela Transformers: " + prefix)
+def generateTextWithGPT2(prefix, length, numSamples, prob):
+    prefix = s.cleanSentence(prefix)
+    logging.debug("Texto recebido pela GPT2: " + prefix)
 
     import random
     if os.path.isfile("INTERRUPT_GPT2_SENTENCES"):
@@ -70,21 +74,18 @@ def generateText(initialText):
         os.remove("generated.txt")
     while(True):
         logging.debug("Texto recebido pelo GPT-2: " + text)
-        endProcedure = generateTextWithTransformers(initialText + text, 10, 20, prob)
+        endProcedure = generateTextWithGPT2(s.cleanSentence(initialText) + s.cleanSentence(text), 10, 20, prob)
 
         f = open("generated.txt", "r")
         for x in f:
             text += x
-        text = text.replace("\n", "")
-        text = text.replace("  ", "")
+        text = s.cleanSentence(text)
         f.close()
 
         logging.debug("Texto lido no arquivo: " + text)
         if(endProcedure):
             f = open("generated.txt", "w")
-            text = text.replace("\"", "")
             f.write(text)
             f.close()
             return text
-        #sair = input("Deseja interromper? Digite sair para encerrar: ")
         prob += 0.15
