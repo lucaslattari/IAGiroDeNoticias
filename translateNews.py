@@ -73,10 +73,12 @@ def constructDictionary(dHeader, dArticle, totalOfArticles = 3):
         if(path.exists("traduzidos/manchete" + str(i)) == False):
             logging.debug("CUIDADO: Você está gastando a cota da API de tradução!")
             f = open("traduzidos/mancheteingles" + str(i), "w")
-            f.write(dFinal[i]["manchete"])
+            f.write(headline)
             f.close()
 
+            logging.info(headline)
             dFinal[i]["manchete"] = translateConsideringAPILimit(headline, "en_to_pt")
+            logging.info(dFinal[i]["manchete"])
             f = open("traduzidos/manchete" + str(i), "w")
             f.write(dFinal[i]["manchete"])
             f.close()
@@ -91,7 +93,7 @@ def constructDictionary(dHeader, dArticle, totalOfArticles = 3):
         dFinal[i]["autor"] = dArticle[i]["autor"]
         dFinal[i]["data"] = dArticle[i]["data"]
 
-        maxBytes = 500
+        maxBytes = 480
         tempText = ""
         countBytes = 0
         stringOverflowBytes = 0
@@ -121,7 +123,9 @@ def constructDictionary(dHeader, dArticle, totalOfArticles = 3):
                     f.write(tempText)
                     f.close()
 
+                    logging.debug(tempText)
                     tempText = translateConsideringAPILimit(tempText, "en_to_pt")
+                    logging.debug(tempText)
                     f = open("traduzidos/corpodotexto" + str(i), "a")
                     f.write(tempText)
                     f.close()

@@ -33,7 +33,6 @@ if(INSTALL_PACKAGES):
     installTorch()
     installModule("librosa")
     installModule("opencv-python")
-    installModule("mutagen")
     installModule("moviepy")
     installModule("google-api-python-client")
     installModule("http.client")

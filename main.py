@@ -16,13 +16,7 @@ import os.path
 from os import path
 import re
 import stringUtils as s
-
-def saveMP3Duration(mp3File):
-    from mutagen.mp3 import MP3
-    audio = MP3(mp3File)
-    f = open("mp3duration", "a+")
-    f.write(str(audio.info.length) + " : " + mp3File + "\n")
-    f.close()
+import math
 
 def generatePodcastDialogMP3Files(dialogName):
     listOfFiles = []
@@ -40,7 +34,6 @@ def generatePodcastDialogMP3Files(dialogName):
             fSub.close()
             logging.info("Salvando arquivo " + mp3File)
             speech.speechNews(line, mp3File, "iasmim")
-            saveMP3Duration(mp3File)
         else:
             mp3File = dialogName + str(talks) + "_gpt2.mp3"
             line = line[2:]
@@ -82,8 +75,6 @@ def generatePodcastDialogMP3Files(dialogName):
             fSub.close()
             logging.info("Salvando arquivo " + mp3File)
             speech.speechNews(gpt2Talk, mp3File, "GPT2")
-            saveMP3Duration(mp3File)
-        AudioSegment.from_mp3(mp3File)
         talks += 1
     ff.close()
     return listOfFiles
@@ -92,6 +83,8 @@ def generateHeadlines(dFinal):
     headlines = ""
     for i in range(3):
         if "manchete" in dFinal[i]:
+            if(isinstance(dFinal[i]["manchete"], list)):
+                dFinal[i]["manchete"] = dFinal[i]["manchete"][0]
             if(i < 2):
                 headlines += dFinal[i]["manchete"] + " , "
             else:
@@ -103,8 +96,7 @@ def generateHeadlines(dFinal):
     fSub.write("\n")
     fSub.close()
     speech.speechNews(headlines, mp3File, "iasmim")
-    logging.info("Salvando arquivo " + mp3File)
-    saveMP3Duration(mp3File)
+
     return mp3File
 
 import codecs
@@ -115,6 +107,8 @@ def generateNewsByID(dFinal, idNews):
     with codecs.open("noticia", 'r', encoding='utf8') as fp:
         line = fp.readline()
         if '%texto traduzido%' in line:
+            if(isinstance(dFinal[idNews]["texto traduzido"], list)):
+                dFinal[idNews]["texto traduzido"] = dFinal[idNews]["texto traduzido"][0]
             line = line.replace("%texto traduzido%", dFinal[idNews]["texto traduzido"])
         talk += line
         while line:
@@ -133,8 +127,6 @@ def generateNewsByID(dFinal, idNews):
     fSub.write("\nIAsmim: " + talk)
     fSub.write("\n")
     fSub.close()
-    speech.speechNews(talk, mp3File, "iasmim")
-    saveMP3Duration(mp3File)
     return mp3File
 
 def generateGPT2Comment(prefix, idNews):
@@ -179,7 +171,6 @@ def generateGPT2Comment(prefix, idNews):
     fSub.write("\n")
     fSub.close()
     speech.speechNews(text, mp3File, "GPT2")
-    saveMP3Duration(mp3File)
     return mp3File
 
 def concatenateMP3s(mp3List):
@@ -207,7 +198,7 @@ def main():
     dFinal = trans.getTranslatedData(dHeader, dArticle)
 
     fSub = open("subtitles", "w").close()
-    open("mp3duration", 'w').close()
+    open("mp3files", 'w').close()
     logging.info('Gerando abertura do podcast em MP3')
     mp3FilesList = generatePodcastDialogMP3Files("abertura")
 
@@ -220,7 +211,6 @@ def main():
     fSub.write("\n")
     fSub.close()
     mp3FilesList.append("intro_music.mp3")
-    saveMP3Duration("intro_music.mp3")
 
     for i in range(0, 3):
         logging.info('Gerando notícia ' + str(i) + ' em MP3')
@@ -240,12 +230,12 @@ def main():
     fSub.write("\n")
     fSub.close()
     mp3FilesList.append("ending_music.mp3")
-    saveMP3Duration("ending_music.mp3")
+
     logging.info('Sintetizando programa final em MP3')
     concatenateMP3s(mp3FilesList)
 
     logging.info('Sintetizando vídeo em formato AVI')
-    video.synthetizeVideo("final.mp3", "final.avi")
+    video.synthetizeVideo(mp3FilesList, "final.mp3", "final.avi")
 
     f = open("descricao", "w")
     f.write("Link da primeira notícia: " + dFinal[0]["url"])
@@ -257,8 +247,7 @@ def main():
 
     os.remove("generated.txt")
     os.remove("descricao")
-    os.remove("encerramento")
-    os.remove("mp3duration")
+    os.remove("mp3files")
     os.remove("gpt2.vbs")
     os.remove("final.mp4")
     os.remove("final.avi")
@@ -268,8 +257,6 @@ def main():
             if os.path.splitext(filename)[1] == ".mp3":
                 if((filename != 'intro_music.mp3') and (filename != 'ending_music.mp3')):
                     os.remove(filename)
-            elif os.path.splitext(filename)[1] == ".pkl":
-                os.remove(filename)
 
     #opening = tg.generateText("")
 

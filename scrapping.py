@@ -9,8 +9,9 @@ import logging
 import re
 import stringUtils as s
 import os.path
+from datetime import datetime, timedelta
 
-def getTechNewsFromTheVerge(saveFileInDir, numberOfArticles):
+def getTechNewsFromTheVerge(saveFileInDir):
     dictionary = {}
     dTempComment = {}
 
@@ -33,16 +34,30 @@ def getTechNewsFromTheVerge(saveFileInDir, numberOfArticles):
                 dTempComment[h2.text] = 0
 
     newDict = {}
-    ii = 1
     for key, comments in sorted(dTempComment.items(), key=lambda i: i[1], reverse=True):
         for name, url in dictionary.items():
             if(name == key):
                 newDict[name] = {}
                 newDict[name] = dictionary[name]
 
-        if(ii == numberOfArticles):
-            break
-        ii += 1
+    pattern = re.compile("[0-9]+")
+    keyToRemove = []
+    for title, url in newDict.items():
+        digits = pattern.findall(url)[:-1]
+
+        day = datetime.today().strftime("%d")
+        d1 = datetime.today() - timedelta(days=1)
+
+        #hoje
+        if(digits[1] == datetime.today().strftime("%m") and digits[2] == datetime.today().strftime("%d")):
+            continue
+        elif(digits[1] == d1.today().strftime("%m") and digits[2] == d1.strftime("%d")): #ontem
+            continue
+        else:
+            keyToRemove.append(title)
+
+    for key in keyToRemove:
+        del(newDict[key])
 
     del(dTempComment)
     del(dictionary)
@@ -84,7 +99,7 @@ def extractTextFromNews(dictionary, saveFileInDir):
     dictionaryOfArticles = {}
     listToIgnore = ('Credits', 'Vice president:', 'Deputy editor:' , 'Director of audience development:',
     'Writers:', 'Intern:', 'Social media managers:', '         ', 'Vox Media has affiliate partnerships. These do not influence editorial content, though Vox Media may earn commissions for products purchased via affiliate links. For more information, see our ethics policy.',
-    'Verge Deals on Twitter', 'Related')
+    'Verge Deals on Twitter', 'Related', 'Command Line is The Verge’s daily newsletter about computers, gadgets, and software. You should subscribe! I’m eager to hear your feedback. Please feel free to email me at')
 
     iterations = 0
     for text, url in tqdm(dictionary.items()):
@@ -175,7 +190,7 @@ def scrapDataFromTheVerge():
         f.close()
     else:
         logging.info('Carregando manchetes do site')
-        dictionaryTechNews = getTechNewsFromTheVerge(True, 10)
+        dictionaryTechNews = getTechNewsFromTheVerge(True)
 
     if(os.path.isfile('vergearticles.pkl')):
         logging.info('Carregando artigos do site salvos em disco')

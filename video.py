@@ -6,6 +6,7 @@ import re
 import os
 import os.path
 import logging
+from pydub import AudioSegment
 
 def showImage(frame):
     cv2.imshow('imagem exibida', frame)
@@ -29,22 +30,32 @@ def generateTextInFrame(whichBot):
         img = cv2.imread("music.jpg")
         fontColor = (0, 255, 0)
 
-    img = cv2.resize(img, (640, 480))
+    img = cv2.resize(img, (1280, 720))
     cv2.putText(img, whichBot, position, font, fontScale, fontColor, lineType)
 
     return img
 
-def generateVideoFile(finalVideoFilename):
+def generateVideoFile(mp3FilesList, finalVideoFilename):
     logging.debug(finalVideoFilename)
     if(os.path.exists(finalVideoFilename) == False):
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        writer = cv2.VideoWriter(finalVideoFilename, fourcc, 20.0, (640, 480))
+        writer = cv2.VideoWriter(finalVideoFilename, fourcc, 20.0, (1280, 720))
 
         try:
-            f = open("mp3duration", "r")
-            for line in f:
-                line = line.replace("\n", "")
-                seconds, whoIsTalking = line.split(" : ")
+            for mp3 in mp3FilesList:
+                audio = AudioSegment.from_mp3(mp3)
+                seconds = audio.duration_seconds
+                logging.debug(seconds)
+
+                import math
+                frac, whole = math.modf(seconds)
+                remaining = 1.0 - frac
+                silence = AudioSegment.silent(duration=remaining)
+                audio = audio + silence
+
+                seconds = int(round(audio.duration_seconds))
+                logging.debug(seconds)
+                whoIsTalking = mp3.split("_")[1]
                 if re.search("iasmim", whoIsTalking):
                     logging.debug(whoIsTalking)
                     frame = generateTextInFrame("IAsmim")
@@ -58,14 +69,9 @@ def generateVideoFile(finalVideoFilename):
                     logging.debug(whoIsTalking)
                     frame = generateTextInFrame("Unknown")
 
-                durationofMP3 = float(seconds)
-                frames = 0
-
-                import math
-                while(int(20.0 * (durationofMP3 + 1)) > frames):
+                totalFrames = 20 * seconds
+                for i in range(0, totalFrames):
                     writer.write(frame)
-                    frames += 1
-            f.close()
         except OSError:
             print("Não foi possível abrir o arquivo mp3duration")
         writer.release()
@@ -77,6 +83,6 @@ def addAudioInVideo(audioFile, videoFile):
     video = mp.VideoFileClip(videoFile)
     video.write_videofile("final.mp4", audio=audioFile)
 
-def synthetizeVideo(finalAudioFilename, finalVideoFilename):
-    generateVideoFile(finalVideoFilename)
+def synthetizeVideo(mp3FilesList, finalAudioFilename, finalVideoFilename):
+    generateVideoFile(mp3FilesList, finalVideoFilename)
     addAudioInVideo(finalAudioFilename, finalVideoFilename)
