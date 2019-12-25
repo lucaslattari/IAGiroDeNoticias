@@ -1,5 +1,6 @@
 # coding: utf-8
 from gtts import gTTS
+from google.cloud import texttospeech
 import os
 import pydub
 from pydub import AudioSegment
@@ -19,6 +20,16 @@ def changePitch(filename, steps):
     os.remove("temp.wav")
 
 def saveMP3OfTextGoogle(speechText, mp3File):
+    '''
+    client = texttospeech.TextToSpeechClient()
+    synthesis_input = texttospeech.types.SynthesisInput(text=speechText)
+    voice = texttospeech.types.VoiceSelectionParams(
+        language_code='pt-br',
+        ssml_gender=texttospeech.enums.SsmlVoiceGender.NEUTRAL)
+
+    print("ok")
+    input()
+    '''
     tts = gTTS(text=speechText, lang='pt-br', slow=False)
     tts.save(mp3File)
 

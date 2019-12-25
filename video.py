@@ -7,6 +7,7 @@ import os
 import os.path
 import logging
 from pydub import AudioSegment
+import moviepy.editor as mp
 
 def showImage(frame):
     cv2.imshow('imagem exibida', frame)
@@ -32,57 +33,70 @@ def generateTextInFrame(whichBot):
 
     img = cv2.resize(img, (1280, 720))
     cv2.putText(img, whichBot, position, font, fontScale, fontColor, lineType)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     return img
 
-def generateVideoFile(mp3FilesList, finalVideoFilename):
-    logging.debug(finalVideoFilename)
-    if(os.path.exists(finalVideoFilename) == False):
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        writer = cv2.VideoWriter(finalVideoFilename, fourcc, 20.0, (1280, 720))
+def make_frame_iasmim(t):
+    return generateTextInFrame("IAsmim")
 
-        try:
-            for mp3 in mp3FilesList:
-                audio = AudioSegment.from_mp3(mp3)
-                seconds = audio.duration_seconds
-                logging.debug(seconds)
+def make_frame_gpt2(t):
+    return generateTextInFrame("GPT-2")
 
-                import math
-                frac, whole = math.modf(seconds)
-                remaining = 1.0 - frac
-                silence = AudioSegment.silent(duration=remaining)
-                audio = audio + silence
+def make_frame_music(t):
+    return generateTextInFrame("Music")
 
-                seconds = int(round(audio.duration_seconds))
-                logging.debug(seconds)
-                whoIsTalking = mp3.split("_")[1]
-                if re.search("iasmim", whoIsTalking):
-                    logging.debug(whoIsTalking)
-                    frame = generateTextInFrame("IAsmim")
-                elif re.search("gpt2", whoIsTalking):
-                    logging.debug(whoIsTalking)
-                    frame = generateTextInFrame("GPT-2")
-                elif re.search("music", whoIsTalking):
-                    logging.debug(whoIsTalking)
-                    frame = generateTextInFrame("Musica")
-                else:
-                    logging.debug(whoIsTalking)
-                    frame = generateTextInFrame("Unknown")
+def generateVideoFile(mp3Filename, mp4Filename):
+    if os.path.exists(mp4Filename) == True:
+        return
+    logging.info(mp4Filename)
 
-                totalFrames = 20 * seconds
-                for i in range(0, totalFrames):
-                    writer.write(frame)
-        except OSError:
-            print("Não foi possível abrir o arquivo mp3duration")
-        writer.release()
-    else:
-        logging.info("Vídeo já existe em disco")
+    audioOfClip = mp.AudioFileClip(mp3Filename)
+    if(mp3Filename == "intro_music.mp3"):
+        from moviepy.audio.fx.volumex import volumex
+        audioOfClip = audioOfClip.fx(volumex, 0.5)
+    seconds = audioOfClip.duration
+    logging.debug(seconds)
 
-def addAudioInVideo(audioFile, videoFile):
-    import moviepy.editor as mp
-    video = mp.VideoFileClip(videoFile)
-    video.write_videofile("final.mp4", audio=audioFile)
+    whoIsTalking = mp3Filename.split("_")[1]
 
-def synthetizeVideo(mp3FilesList, finalAudioFilename, finalVideoFilename):
-    generateVideoFile(mp3FilesList, finalVideoFilename)
-    addAudioInVideo(finalAudioFilename, finalVideoFilename)
+    if re.search("iasmim", whoIsTalking):
+        logging.debug(whoIsTalking)
+        clip = mp.VideoClip(make_frame_iasmim, duration = seconds)
+    elif re.search("gpt2", whoIsTalking):
+        logging.debug(whoIsTalking)
+        clip = mp.VideoClip(make_frame_gpt2, duration = seconds)
+    elif re.search("music", whoIsTalking):
+        logging.debug(whoIsTalking)
+        clip = mp.VideoClip(make_frame_music, duration = seconds)
+
+    #clip = clip.set_audio(audioOfClip)
+    clip.write_videofile(mp4Filename, fps = 20.0, verbose = False)
+
+def concatenateVideos(videoFilenameList, finalVideoFilename):
+    if os.path.exists("final.mp4") == True:
+        return
+
+    videoList = []
+    for videoFilename in videoFilenameList:
+        videoList.append(mp.VideoFileClip(videoFilename))
+
+    finalVideo = mp.concatenate_videoclips(videoList)
+    finalAudio = mp.AudioFileClip("final.mp3")
+    finalVideo = finalVideo.set_audio(finalAudio)
+    finalVideo.write_videofile("final.mp4", verbose = False)
+
+    #for videoFilename in videoFilenameList:
+    #    os.remove(videoFilename)
+
+def synthetizeVideo(mp3FilesList, finalVideoFilename):
+    videoFilenameList = []
+    for mp3Filename in mp3FilesList:
+        mp4Filename = mp3Filename.split('.')[0] + ".mp4"
+        logging.debug(mp3Filename)
+        logging.debug(mp4Filename)
+
+        generateVideoFile(mp3Filename, mp4Filename)
+        videoFilenameList.append(mp4Filename)
+    logging.debug("Gerando final.mp4")
+    concatenateVideos(videoFilenameList, finalVideoFilename)
