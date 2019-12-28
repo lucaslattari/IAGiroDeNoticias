@@ -110,7 +110,6 @@ def extractTextFromNews(dictionary, saveFileInDir):
         if len(divHeader) == 0:
             divHeader = soup.findAll('div', {"class": "l-root l-reskin"})
         for eachDiv in divHeader:
-
             #pega título da matéria
             h1HeaderTitle = eachDiv.findAll('h1', {"class": "c-page-title"})
             for eachH1 in h1HeaderTitle:
@@ -122,8 +121,12 @@ def extractTextFromNews(dictionary, saveFileInDir):
 
             #pega autor da matéria
             spanHeaderTitle = eachDiv.find('span', {"class": "c-byline__item"})
-            dictionaryOfArticles[iterations]["autor"] = spanHeaderTitle.find("a").text
-            logging.debug(spanHeaderTitle.find("a").text)
+            if spanHeaderTitle.find("a") is not None:
+                logging.debug(spanHeaderTitle.find("a"))
+                dictionaryOfArticles[iterations]["autor"] = spanHeaderTitle.find("a").text
+            else:
+                logging.debug(spanHeaderTitle.text)
+                dictionaryOfArticles[iterations]["autor"] = spanHeaderTitle.text
 
             #pega data da publicacao
             time = eachDiv.find('time', {"class": "c-byline__item"}).text.replace(" ", "")

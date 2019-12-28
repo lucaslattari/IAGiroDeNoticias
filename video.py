@@ -1,5 +1,4 @@
 # coding: utf-8
-import cv2
 import numpy as np
 import time
 import re
@@ -8,6 +7,7 @@ import os.path
 import logging
 from pydub import AudioSegment
 import moviepy.editor as mp
+import cv2
 
 def showImage(frame):
     cv2.imshow('imagem exibida', frame)

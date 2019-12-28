@@ -5,9 +5,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = "2"
 logging.getLogger("tensorflow").setLevel(logging.ERROR)
 
 import scrapping as scrap
-import translateNews as trans
-import textgeneration as tg
 import podcast as pod
+import translateNews as trans
 from pydub import AudioSegment
 import video
 import youtube as yt
@@ -82,7 +81,6 @@ def main():
     os.remove("mp3files")
     os.remove("gpt2.vbs")
     os.remove("final.mp4")
-    os.remove("final.avi")
     os.remove("temp.wav")
     for _, _, files in os.walk('.'):
         for filename in files:

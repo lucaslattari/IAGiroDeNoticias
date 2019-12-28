@@ -3,6 +3,8 @@ import speech
 from os import path
 import stringUtils as s
 from pydub import *
+import translateNews as trans
+import textgeneration as tg
 
 def generatePodcastDialogMP3Files(dialogName):
     ff = open(dialogName, "r")
